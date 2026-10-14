@@ -1,7 +1,6 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const supabase = require('./src/config/supabase');
 const app = express();
 const routes = require('./src/routes');
 
@@ -16,8 +15,6 @@ app.get('/', (req, res) => {
 
 // Router
 app.use('/api', routes);
-
-
 
 
 // Chạy server
