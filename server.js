@@ -9,8 +9,14 @@ const routes = require('./src/routes');
 app.use(cors()); // Cho phép Frontend gọi API
 app.use(express.json()); // Đọc dữ liệu JSON từ request body
 
+// Route kiểm tra server
+app.get('/', (req, res) => {
+    res.send('🚀 Backend Note API is running!');
+});
+
 // Router
 app.use('/api', routes);
+
 
 
 
