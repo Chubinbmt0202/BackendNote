@@ -9,18 +9,21 @@ const getAllUsers = async () => {
     return { data, error };
 };
 
-const signInWithGoogle = async (email, displayName, photoURL) => {
-    // thêm dữ liệu vào bảng 'user' trong supabase
-    const payload = {
-        email: email,
-        displayName: displayName,
-        photoURL: photoURL,
-    };
-    const { data, error } = await supabase
+const signInWithGoogle = async ({ email, displayName, photoURL }) => {
+    const { data: existingUser, error: lookupError } = await supabase
         .from('user')
-        .insert([payload]);
+        .select('id')
+        .eq('email', email)
+        .maybeSingle();
 
+    if (lookupError) return { data: null, error: lookupError };
 
+    const payload = { email, displayName, photoURL };
+    const query = existingUser
+        ? supabase.from('user').update(payload).eq('id', existingUser.id)
+        : supabase.from('user').insert([payload]);
+
+    const { data, error } = await query.select().single();
     return { data, error };
 };
 
