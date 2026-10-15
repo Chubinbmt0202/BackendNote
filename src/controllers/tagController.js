@@ -3,7 +3,16 @@ const tagModel = require('../models/tagModel');
 // Lấy tất cả tags
 const getAllTags = async (req, res) => {
     try {
-        const { data, error } = await tagModel.getAllTags();
+        const { user_id } = req.query;
+
+        if (user_id !== undefined && !/^[1-9]\d*$/.test(user_id)) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'user_id phải là số nguyên dương'
+            });
+        }
+
+        const { data, error } = await tagModel.getAllTags({ user_id });
         if (error) throw error;
 
         res.status(200).json({
