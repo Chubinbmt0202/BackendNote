@@ -41,7 +41,7 @@ const createTag = async (data) => {
 
     const { data: newTag, error } = await supabase
         .from('tags')
-        .insert([payload])
+        .upsert([payload], { onConflict: 'user_id,name' })
         .select('*')
         .single();
 
@@ -49,19 +49,9 @@ const createTag = async (data) => {
 };
 
 const getOrCreateTag = async (userId, name) => {
-    const { data: existingTag, error: lookupError } = await supabase
-        .from('tags')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('name', name)
-        .maybeSingle();
-
-    if (lookupError) return { data: null, error: lookupError };
-    if (existingTag) return { data: existingTag, error: null };
-
     const { data, error } = await supabase
         .from('tags')
-        .insert([{ user_id: userId, name }])
+        .upsert([{ user_id: userId, name }], { onConflict: 'user_id,name' })
         .select('*')
         .single();
 
