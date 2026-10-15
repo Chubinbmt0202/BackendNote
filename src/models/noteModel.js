@@ -1,4 +1,5 @@
 const supabase = require('../config/supabase');
+const tagModel = require('./tagModel');
 
 // Lấy danh sách ghi chú (hỗ trợ lọc theo user_id, tag_id, is_trashed, search)
 const getAllNote = async (filters = {}) => {
@@ -80,16 +81,28 @@ const getNoteByTagId = async (tagId, userId = null) => {
 
 // Tạo mới ghi chú
 const createNote = async (data) => {
-    // Chuẩn hóa dữ liệu theo đúng schema DB
+    const userId = data.user_id || 1;
+    const category = typeof data.category === 'string' && data.category.trim()
+        ? data.category.trim()
+        : 'General';
+    let tagId = typeof data.tag_id === 'string' && data.tag_id.trim()
+        ? data.tag_id.trim()
+        : null;
+
+    if (!tagId) {
+        const { data: tag, error: tagError } = await tagModel.getOrCreateTag(userId, category);
+        if (tagError) return { data: null, error: tagError };
+        tagId = tag.id;
+    }
+
     const payload = {
-        user_id: data.user_id || 1, // user_id bigint NOT NULL
-        title: data.title,          // title text NOT NULL
+        user_id: userId,
+        title: data.title,
         content: data.content !== undefined ? data.content : null,
-        // Nếu truyền tag_id là chuỗi rỗng "" thì ép về null để không bị lỗi UUID syntax
-        tag_id: data.tag_id && data.tag_id.trim() !== '' ? data.tag_id : null
+        category,
+        tag_id: tagId
     };
 
-    if (data.category) payload.category = data.category; // default 'General'
     if (data.is_pinned !== undefined) payload.is_pinned = data.is_pinned; // default false
     if (data.is_trashed !== undefined) payload.is_trashed = data.is_trashed; // default false
 

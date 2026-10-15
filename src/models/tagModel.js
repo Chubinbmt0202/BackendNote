@@ -48,6 +48,26 @@ const createTag = async (data) => {
     return { data: newTag, error };
 };
 
+const getOrCreateTag = async (userId, name) => {
+    const { data: existingTag, error: lookupError } = await supabase
+        .from('tags')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('name', name)
+        .maybeSingle();
+
+    if (lookupError) return { data: null, error: lookupError };
+    if (existingTag) return { data: existingTag, error: null };
+
+    const { data, error } = await supabase
+        .from('tags')
+        .insert([{ user_id: userId, name }])
+        .select('*')
+        .single();
+
+    return { data, error };
+};
+
 // Cập nhật thông tin tag
 const updateTag = async (id, data) => {
     const payload = {};
@@ -88,6 +108,7 @@ module.exports = {
     getAllNotes: getAllTags,
     getTagById,
     createTag,
+    getOrCreateTag,
     updateTag,
     deleteTag
 };
