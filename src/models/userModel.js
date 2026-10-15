@@ -9,4 +9,19 @@ const getAllUsers = async () => {
     return { data, error };
 };
 
-module.exports = { getAllUsers };
+const signInWithGoogle = async (email, displayName, photoURL) => {
+    // thêm dữ liệu vào bảng 'user' trong supabase
+    const payload = {
+        email: email,
+        displayName: displayName,
+        photoURL: photoURL,
+    };
+    const { data, error } = await supabase
+        .from('user')
+        .insert([payload]);
+
+
+    return { data, error };
+};
+
+module.exports = { getAllUsers, signInWithGoogle };
