@@ -3,9 +3,9 @@ const tagModel = require('../models/tagModel');
 // Lấy tất cả tags
 const getAllTags = async (req, res) => {
     try {
-        const { user_id } = req.query;
+        const user_id = req.query.user_id !== undefined ? req.query.user_id : req.query.userId;
 
-        if (user_id !== undefined && !/^[1-9]\d*$/.test(user_id)) {
+        if (user_id !== undefined && (typeof user_id !== 'string' || !/^[1-9]\d*$/.test(user_id))) {
             return res.status(400).json({
                 status: 'error',
                 message: 'user_id phải là số nguyên dương'

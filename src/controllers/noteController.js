@@ -3,7 +3,18 @@ const noteModel = require('../models/noteModel');
 // Lấy danh sách ghi chú (hỗ trợ query filter: tag_id, is_trashed, search)
 const getAllNotes = async (req, res) => {
     try {
-        const { data, error } = await noteModel.getAllNote(req.query);
+        const userId = req.query.user_id !== undefined ? req.query.user_id : req.query.userId;
+        if (userId !== undefined && (typeof userId !== 'string' || !/^[1-9]\d*$/.test(userId))) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'user_id phải là số nguyên dương'
+            });
+        }
+
+        const { data, error } = await noteModel.getAllNote({
+            ...req.query,
+            user_id: userId
+        });
         if (error) throw error;
         res.status(200).json({
             status: 'success',
@@ -43,7 +54,15 @@ const getNoteById = async (req, res) => {
 const getAllNoteByTagId = async (req, res) => {
     try {
         const { tagId } = req.params;
-        const { data, error } = await noteModel.getNoteByTagId(tagId);
+        const userId = req.query.user_id !== undefined ? req.query.user_id : req.query.userId;
+        if (userId !== undefined && (typeof userId !== 'string' || !/^[1-9]\d*$/.test(userId))) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'user_id phải là số nguyên dương'
+            });
+        }
+
+        const { data, error } = await noteModel.getNoteByTagId(tagId, userId);
         if (error) throw error;
         res.status(200).json({
             status: 'success',
